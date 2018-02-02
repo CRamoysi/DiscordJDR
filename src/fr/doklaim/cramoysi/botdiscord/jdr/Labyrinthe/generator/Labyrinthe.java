@@ -3,9 +3,15 @@
  */
 package fr.doklaim.cramoysi.botdiscord.jdr.Labyrinthe.generator;
 
+import fr.doklaim.cramoysi.botdiscord.Exception.NotYetException;
+import fr.doklaim.cramoysi.botdiscord.Exception.TryAgainException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -14,15 +20,20 @@ import java.util.Random;
 public final class Labyrinthe {
     
     private static final int MAXTURNRATIO = 10;
+    private int m = 0,n = 0;//ne sert que pour la generation et verification
+    
+    public ArrayList<Integer>[] laby = null;
+    public int in, out;
+    
     
     /**
-     * Generation d'un labyrinthe de a sur b cases
+     * Generation d'un labyrinthe de m sur n cases
      * @param m
      * @param n
-     * @return ArrayList<Integer>[]
      */
-    public static ArrayList<Integer>[] generate(int m, int n){
-        
+    public void generate(int m, int n){
+        this.m = m;
+        this.n = n;
         //Les transitions dans le Labyrinthe
         //Tableau de m*n arrayList
         ArrayList<Integer>[] laby = new ArrayList[m*n];
@@ -36,13 +47,11 @@ public final class Labyrinthe {
         int brokenWall = 0;//nombre de mur cassé
         
         Random r = new Random(System.currentTimeMillis());
-        
-        
         //variable de tour
         int currCaseID; //ID de la case courrante
         int currCaseIDx, currCaseIDy;
         int nextCaseID; //ID de la case à lier
-        List<Integer> l = new ArrayList<>(); //liste des case autour de la courrante
+        List<Integer> l = new ArrayList<>(); //liste des cases autour de la courante
 
         
         /*
@@ -93,13 +102,83 @@ public final class Labyrinthe {
             
         }
         
-        return laby;
+        this.laby = laby;
     }
     
     
+    public void addINOUT() throws NotYetException, TryAgainException{
+        if(this.laby == null) throw new NotYetException("generate() must be called before");
+        /*
+        choisir de façon aleatoire une entrée et une sortie puis verifier que l'on peux aller de l'un à l'autre via un algorithme de parcours
+        
+        DFS iterative
+        utilisation d'une pile (LIFO), le but est uniquement de savoir si la sortie est accessible
+        on va partir de l'entrée, si aucun de ses adjacents ne sont la sortie, on les empile.
+        on depile le premier et on le considere comme etant la nouvelle entrée
+        On va ranger dans une autre liste les salles que l'on a deja depilé afin de verifier que l'on ne l'a pas deja verifié
+        
+        */
+        
+        Stack<Integer> pileRestant = new Stack<>();
+        Stack<Integer> pileVerifie = new Stack<>();
+        
+        Random r = new Random(System.currentTimeMillis());
+        int in = r.nextInt(m*n);
+        int out = r.nextInt(m*n);
+        if(in == out) throw new TryAgainException("input and output are randomly generated as the same.");
+
+
+        int current = in;
+        int tmp;
+        pileRestant.push(in);
+       
+        while(!pileRestant.empty()){
+           current = pileRestant.pop();
+           System.out.println("current = "+current);
+           if(current == out){//c'est ok, on arrete la boucle
+               System.out.println("current == out");
+               current = -1;
+               pileRestant.clear();
+               break;
+           }
+           
+           pileVerifie.push(current);
+           
+            if(!this.laby[current].isEmpty()){
+                System.out.println("not empty");
+                for (Iterator<Integer> it = this.laby[current].iterator(); it.hasNext();) {
+                    tmp = it.next();
+                    if(!pileVerifie.contains(tmp)){
+                        pileRestant.push(tmp);
+                    }
+                }
+            }
+        }
+        
+        if(current != -1) throw new TryAgainException("input and output are not connected.");
+        this.in = in;
+        this.out = out;
+        
+    }
     
-    
-    
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        
+        for(int i = 0; i < m*n; i++){
+            
+            sb.append("case(").append(i).append(")=>");
+            for(int j=0; j<laby[i].size(); j++){
+                sb.append("[").append(laby[i].get(j)).append("]");
+            }
+            sb.append("\n");    
+        }
+        
+        sb.append("INPUT: ").append(in).append("\n");
+        sb.append("OUTPUT: ").append(out).append("\n");
+        
+        return sb.toString();
+    }
     
             
             
@@ -109,27 +188,19 @@ public final class Labyrinthe {
         int m = 20, n = 20;
         
         long t = System.currentTimeMillis();
-        ArrayList<Integer>[] laby = generate(m,n);
+        Labyrinthe l = new Labyrinthe();
+        l.generate(m,n);
+        try {
+            l.addINOUT();
+        } catch (NotYetException | TryAgainException ex) {
+            Logger.getLogger(Labyrinthe.class.getName()).log(Level.SEVERE, null, ex);
+        }
         long t2 = System.currentTimeMillis();
         
         System.out.printf("Temps d'execution: %dms\n", t2-t);
         
-//        System.out.println(laby);
-        
-//        for(int i = 0; i < m*n; i++){
-//            StringBuilder sb = new StringBuilder();
-//            
-//            sb.append("case("+i+")=>");
-//            for(int j=0; j<laby[i].size(); j++){
-//                sb.append("["+laby[i].get(j)+"]");
-//            }
-//            
-//            
-//            System.out.println(sb.toString());
-//        }
-        
-        
-        
+        System.out.println(l);
+
     }
     
     
