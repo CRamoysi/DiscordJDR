@@ -1,7 +1,7 @@
 /*
  
  */
-package fr.doklaim.cramoysi.botdiscord.jdr.Labyrinthe.generator;
+package fr.doklaim.cramoysi.botdiscord.jdr.Labyrinthe;
 
 import fr.doklaim.cramoysi.botdiscord.Exception.NotYetException;
 import fr.doklaim.cramoysi.botdiscord.Exception.TryAgainException;
@@ -14,10 +14,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Genere le labyrinthe (graphe/arbre) representant le donjon. Il faut considerer le donjon comme etant un arbre partant de l'entrée. Une des feuilles est la sortie
  * @author CRamoysi
  */
-public final class Labyrinthe {
+public final class Generator {
     
     private static final int MAXTURNRATIO = 10;
     private int m = 0,n = 0;//ne sert que pour la generation et verification
@@ -27,14 +27,14 @@ public final class Labyrinthe {
     
     
     /**
-     * Generation d'un labyrinthe de m sur n cases
+     * Generation d'un labyrinthe de m sur n cases.
      * @param m
      * @param n
      */
     public void generate(int m, int n){
         this.m = m;
         this.n = n;
-        //Les transitions dans le Labyrinthe
+        //Les transitions dans le Generator
         //Tableau de m*n arrayList
         ArrayList<Integer>[] laby = new ArrayList[m*n];
         
@@ -188,12 +188,12 @@ public final class Labyrinthe {
         int m = 20, n = 20;
         
         long t = System.currentTimeMillis();
-        Labyrinthe l = new Labyrinthe();
+        Generator l = new Generator();
         l.generate(m,n);
         try {
             l.addINOUT();
         } catch (NotYetException | TryAgainException ex) {
-            Logger.getLogger(Labyrinthe.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, ex);
         }
         long t2 = System.currentTimeMillis();
         

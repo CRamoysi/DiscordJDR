@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.doklaim.cramoysi.botdiscord.jdr.Labyrinthe.character;
+package fr.doklaim.cramoysi.botdiscord.jdr.character;
 
 /**
- *
+ * L'ensemble des statistiques
  * @author CRamoysi
  */
-public class Player {
-    
-    
+public final class Trait {
+    public int hp;
     
 }
